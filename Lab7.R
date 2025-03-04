@@ -306,5 +306,59 @@ summary_stats_case_4 <- tibble(data = beta.sample) |>
 combined_summary_matrix=rbind(summary_stats_case_1, summary_stats_case_2, summary_stats_case_3, summary_stats_case_4)
 summarize_table=as.data.frame(combined_summary_matrix)
 
-
 #Task Four
+library(cumstats)
+library(patchwork)
+alpha=2
+beta=5
+
+set.seed(7272)
+n <- 500
+beta.sample <- rbeta(n, alpha, beta)
+
+# Create a data frame with the cumulative statistics
+cum_stats_df <- data.frame(
+  x=1:n,
+  mean = cummean(beta.sample),
+  variance = cumvar(beta.sample),
+  skewness = cumskew(beta.sample),
+  kurtosis = cumkurt(beta.sample)-3
+)
+
+# real values #3rd column mean, 4th column variance, 5th column skewness, 6th column kurtosis
+case_1=Beta(alpha,beta)
+
+p_mean <- ggplot(cum_stats_df, aes(x = x, y = mean)) +
+  geom_line() +
+  geom_hline(yintercept = case_1[3], linetype = 'dashed', color = 'red') +
+  labs(title = 'Cumulative Mean')
+
+p_variance <- ggplot(cum_stats_df, aes(x = x, y = variance)) +
+  geom_line() +
+  geom_hline(yintercept = case_1[4], linetype = 'dashed', color = 'red') +
+  labs(title = 'Cumulative Variance')
+
+p_skewness <- ggplot(cum_stats_df, aes(x = x, y = skewness)) +
+  geom_line() +
+  geom_hline(yintercept = case_1[5], linetype = 'dashed', color = 'red') +
+  labs(title = 'Cumulative Skewness')
+
+p_kurtosis <- ggplot(cum_stats_df, aes(x = x, y = kurtosis)) +
+  geom_line() +
+  geom_hline(yintercept = case_1[6], linetype = 'dashed', color = 'red') +
+  labs(title = 'Cumulative Kurtosis')
+
+# Combine plots into a 2x2 grid
+grid_plot <- p_mean + p_variance + p_skewness + p_kurtosis + plot_layout(ncol = 2)
+
+#prints the plot
+print(grid_plot)
+
+
+#Write a for loop to simulate new data, add new line for iterations 2-50
+n=500
+set.seed(7272+i)
+
+
+
+
