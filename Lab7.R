@@ -387,6 +387,26 @@ new_grid_plot= p_mean + p_variance + p_skewness + p_kurtosis + plot_layout(ncol 
 print(new_grid_plot)
 
 #Task Five
+n=500
+alpha=2
+beta=5
+
+#creates blank data frame to store data with 1000 entries
+statistics_df = data.frame(
+  mean = numeric(1000),
+  variance = numeric(1000),
+  skewness = numeric(1000),
+  excess_kurtosis = numeric(1000)
+)
+for (i in 1:1000){
+  set.seed(7272+i)
+  new_data <- rbeta(n, alpha, beta)
+    statistics_df$mean[i] <- mean(new_data)
+    statistics_df$variance[i] <- var(new_data)
+    statistics_df$skewness[i] <- skewness(new_data)
+    statistics_df$excess_kurtosis[i] <- kurtosis(new_data)  # Excess kurtosis (subtract 3)
+  
+}
 
 
 
