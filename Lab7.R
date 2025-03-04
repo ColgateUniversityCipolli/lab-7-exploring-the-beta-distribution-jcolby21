@@ -349,16 +349,44 @@ p_kurtosis <- ggplot(cum_stats_df, aes(x = x, y = kurtosis)) +
   labs(title = 'Cumulative Kurtosis')
 
 # Combine plots into a 2x2 grid
-grid_plot <- p_mean + p_variance + p_skewness + p_kurtosis + plot_layout(ncol = 2)
+grid_plot = p_mean + p_variance + p_skewness + p_kurtosis + plot_layout(ncol = 2)
 
 #prints the plot
 print(grid_plot)
 
 
 #Write a for loop to simulate new data, add new line for iterations 2-50
+alpha=2
+beta=5
 n=500
-set.seed(7272+i)
 
+for (i in 2:50) {
+  set.seed(7272 + i)
+  new_data <- rbeta(n, alpha, beta)
+  new_cum_stats_df <- data.frame(
+    x = 1:n,
+    mean = cummean(new_data),
+    variance = cumvar(new_data),
+    skewness = cumskew(new_data),
+    kurtosis = cumkurt(new_data)-3
+  )
+  # Add the new lines for the statistics
+  p_mean = p_mean +
+    geom_line(data=new_cum_stats_df, aes(x=x, y=mean), color=i)
+  p_variance = p_variance +
+    geom_line(data=new_cum_stats_df, aes(x=x, y=variance), color=i)
+  p_skewness = p_skewness +
+    geom_line(data=new_cum_stats_df, aes(x=x, y=skewness), color=i)
+  p_kurtosis = p_kurtosis +
+    geom_line(data=new_cum_stats_df, aes(x=x, y=kurtosis), color=i)
+    
+  }
+#combines new plots into 2x2
+new_grid_plot= p_mean + p_variance + p_skewness + p_kurtosis + plot_layout(ncol = 2)
+# Show the final plot with simulated data lines
+print(new_grid_plot)
+
+#Task Five
 
 
 
