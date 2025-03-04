@@ -97,3 +97,38 @@ combined_matrix=rbind(case_1, case_2, case_3, case_4)
 results_table=as.data.frame(combined_matrix)
 
 #Task Two
+# function
+beta.moment=function(alpha, beta, k, centered){
+  if (centered==F){
+    integrand= function(x) dbeta(x, alpha, beta)*x^k #function under integral
+    uncentered_moment=integrate(integrand,lower=0, upper=1)#integrates over support [0,1]
+    return(uncentered_moment$value)}
+  if (centered==T){
+    mu_x=alpha/(alpha+beta) #E(x) mean 
+    integrand=function(x) dbeta(x, alpha, beta)*(x-mu_x)^k #function under integral
+    centered_moment=integrate(integrand,lower=0, upper=1) #integrates over support [0,1]
+    return(centered_moment$value)}
+}
+
+#Case 1
+alpha=2
+beta=5
+part_2_case_1=beta.moment(alpha, beta, k=2, centered=F)#change for each moment
+
+#Case 2
+alpha=5
+beta=5
+part_2_case_2=beta.moment(alpha, beta, k=2, centered=F)#change for each moment
+
+#Case 3
+alpha=5
+beta=2
+part_2_case_3=beta.moment(alpha, beta, k=2, centered=F)#change for each moment
+
+#Case 4
+alpha=0.5
+beta=0.5
+part_2_case_4=beta.moment(alpha, beta, k=2, centered=F)#change for each moment
+
+
+#Task Three
