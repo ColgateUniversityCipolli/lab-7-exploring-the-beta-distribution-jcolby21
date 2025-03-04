@@ -132,3 +132,179 @@ part_2_case_4=beta.moment(alpha, beta, k=2, centered=F)#change for each moment
 
 
 #Task Three
+library(e1071) #used for some statistics calculations
+#Case 1
+set.seed(7272) # Set seed so we all get the same results.
+sample.size <- 500 # Specify sample details
+alpha <- 2
+beta <- 5
+beta.sample <- rbeta(n = sample.size,  # sample size
+                     shape1 = alpha,   # alpha parameter
+                     shape2 = beta)    # beta parameter
+# Create a data frame for plotting
+data_case_1 <- tibble(data_case_1 = beta.sample)
+
+# Plot the histogram, density estimate, and Beta(2,5) distribution
+ggplot(data_case_1, aes(x = data_case_1)) +
+  # Histogram with density fill
+  geom_histogram(aes(y = ..density..), bins = 30, fill = "lightblue", color = "black", alpha = 0.6) +
+  
+  # Estimated density from the data
+  stat_density(aes(color = "Estimated Density"), size = 1, geom="line") +
+  
+  # Superimpose the Beta(2,5) distribution
+  stat_function(
+    fun = dbeta, args = list(shape1 = alpha, shape2 = beta), 
+    size = 1,aes(color = "Beta(2, 5) Distribution")) +
+  
+  # Labels and themes
+  labs(
+    title = "Histogram and Density of Beta Sample with Beta(2, 5) Distribution",
+    x = "x",
+    y = "Density"
+  ) +
+  theme_minimal()+
+  theme(legend.position = "bottom")
+
+
+
+summary_stats_case_1 <- tibble(data = beta.sample) |>
+  summarize(
+    mean_sample = mean(data),
+    variance_sample = var(data),
+    skewness_sample = skewness(data),
+    kurtosis_sample = kurtosis(data)  # Excess kurtosis
+  )
+
+#Case 2
+set.seed(7272) # Set seed so we all get the same results.
+sample.size <- 500 # Specify sample details
+alpha <- 5
+beta <- 5
+beta.sample <- rbeta(n = sample.size,  # sample size
+                     shape1 = alpha,   # alpha parameter
+                     shape2 = beta)    # beta parameter
+
+# Create a data frame for plotting
+data_case_2 <- tibble(data_case_2 = beta.sample)
+
+# Plot the histogram, density estimate, and Beta(5,5) distribution
+ggplot(data_case_2, aes(x = data_case_2)) +
+  # Histogram with density fill
+  geom_histogram(aes(y = ..density..), bins = 30, fill = "lightblue", color = "black", alpha = 0.6) +
+  
+  # Estimated density from the data
+  stat_density(aes(color = "Estimated Density"), size = 1, geom="line") +
+  
+  # Superimpose the Beta(5,5) distribution
+  stat_function(
+    fun = dbeta, args = list(shape1 = alpha, shape2 = beta), 
+   size = 1,aes(color = "Beta(5, 5) Distribution")) +
+  
+  # Labels and themes
+  labs(
+    title = "Histogram and Density of Beta Sample with Beta(5, 5) Distribution",
+    x = "x",
+    y = "Density"
+  ) +
+  theme_minimal()+
+  theme(legend.position = "bottom")
+
+summary_stats_case_2 <- tibble(data = beta.sample) |>
+  summarize(
+    mean_sample = mean(data),
+    variance_sample = var(data),
+    skewness_sample = skewness(data),
+    kurtosis_sample = kurtosis(data)  # Excess kurtosis
+  )
+#Case 3
+set.seed(7272) # Set seed so we all get the same results.
+sample.size <- 500 # Specify sample details
+alpha <- 5
+beta <- 2
+beta.sample <- rbeta(n = sample.size,  # sample size
+                     shape1 = alpha,   # alpha parameter
+                     shape2 = beta)    # beta parameter
+# Create a data frame for plotting
+data_case_3 <- tibble(data_case_3 = beta.sample)
+# Plot the histogram, density estimate, and Beta(5,2) distribution
+ggplot(data_case_3, aes(x = data_case_3)) +
+  # Histogram with density fill
+  geom_histogram(aes(y = ..density..), bins = 30, fill = "lightblue", color = "black", alpha = 0.6) +
+  
+  # Estimated density from the data
+  stat_density(aes(color = "Estimated Density"), size = 1, geom="line") +
+  
+  # Superimpose the Beta(5,2) distribution
+  stat_function(
+    fun = dbeta, args = list(shape1 = alpha, shape2 = beta), 
+    size = 1,aes(color = "Beta(5, 2) Distribution")) +
+  
+  # Labels and themes
+  labs(
+    title = "Histogram and Density of Beta Sample with Beta(5, 2) Distribution",
+    x = "x",
+    y = "Density"
+  ) +
+  theme_minimal()+
+  theme(legend.position = "bottom")
+
+
+summary_stats_case_3 <- tibble(data = beta.sample) |>
+  summarize(
+    mean_sample = mean(data),
+    variance_sample = var(data),
+    skewness_sample = skewness(data),
+    kurtosis_sample = kurtosis(data)  # Excess kurtosis
+  )
+
+#Case 4
+set.seed(7272) # Set seed so we all get the same results.
+sample.size <- 500 # Specify sample details
+alpha <- 0.5
+beta <- 0.5
+beta.sample <- rbeta(n = sample.size,  # sample size
+                     shape1 = alpha,   # alpha parameter
+                     shape2 = beta)    # beta parameter
+
+#plot a histogram
+# Create a data frame for plotting
+data_case_4 <- tibble(data_case_4 = beta.sample)
+
+# Plot the histogram, density estimate, and Beta(0.5,0.5) distribution
+ggplot(data_case_4, aes(x = data_case_4)) +
+  # Histogram with density fill
+  geom_histogram(aes(y = ..density..), bins = 30, fill = "lightblue", color = "black", alpha = 0.6) +
+  
+  # Estimated density from the data
+  stat_density(aes(color = "Estimated Density"), size = 1, geom="line") +
+  
+  # Superimpose the Beta(0.5,0.5) distribution
+  stat_function(
+    fun = dbeta, args = list(shape1 = alpha, shape2 = beta), 
+    size = 1,aes(color = "Beta(0.5, 0.5) Distribution")) +
+  
+  # Labels and themes
+  labs(
+    title = "Histogram and Density of Beta Sample with Beta(0.5, 0.5) Distribution",
+    x = "x",
+    y = "Density"
+  ) +
+  theme_minimal()+
+  theme(legend.position = "bottom")
+
+summary_stats_case_4 <- tibble(data = beta.sample) |>
+  summarize(
+    mean_sample = mean(data),
+    variance_sample = var(data),
+    skewness_sample = skewness(data),
+    kurtosis_sample = kurtosis(data)  # Excess kurtosis
+  )
+
+
+#combine all four of the cases of summary stats into one table
+combined_summary_matrix=rbind(summary_stats_case_1, summary_stats_case_2, summary_stats_case_3, summary_stats_case_4)
+summarize_table=as.data.frame(combined_summary_matrix)
+
+
+#Task Four
