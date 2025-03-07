@@ -387,26 +387,65 @@ new_grid_plot= p_mean + p_variance + p_skewness + p_kurtosis + plot_layout(ncol 
 print(new_grid_plot)
 
 #Task Five
+library(moments)
 n=500
 alpha=2
 beta=5
 
 #creates blank data frame to store data with 1000 entries
-statistics_df = data.frame(
-  mean = numeric(1000),
-  variance = numeric(1000),
-  skewness = numeric(1000),
-  excess_kurtosis = numeric(1000)
-)
-for (i in 1:1000){
-  set.seed(7272+i)
-  new_data <- rbeta(n, alpha, beta)
-    statistics_df$mean[i] <- mean(new_data)
-    statistics_df$variance[i] <- var(new_data)
-    statistics_df$skewness[i] <- skewness(new_data)
-    statistics_df$excess_kurtosis[i] <- kurtosis(new_data)  # Excess kurtosis (subtract 3)
+means <- numeric(1000)
+variances <- numeric(1000)
+skewnesses <- numeric(1000)
+kurtoses <- numeric(1000)
+
+# Loop to generate the data and compute statistics
+for (i in 1:1000) {
+  set.seed(7272 + i)  # set seed
   
+  # Simulate data from the Beta distribution
+  data <- rbeta(n, shape1 = alpha, shape2 = beta)
+  
+  # Compute statistics
+  means[i] <- mean(data)
+  variances[i] <- var(data)
+  skewnesses[i] <- skewness(data)
+  kurtoses[i] <- kurtosis(data) - 3  # Excess kurtosis is kurtosis - 3
 }
 
+# Create a data frame with the statistics
+stats_df <- data.frame(
+  means = means,
+  variances = variances,
+  skewnesses = skewnesses,
+  kurtoses = kurtoses
+)
 
+# Plot histograms with density estimates for each statistic
+#plot for mean
+ggplot(stats_df) +
+  geom_histogram(aes(x = means, y = ..density..), bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  geom_density(aes(x = means), color = "red", size = 1) +
+  ggtitle("Sampling Distribution of Means") +
+  theme_minimal()
+
+#Plot for variance
+ggplot(stats_df) +
+  geom_histogram(aes(x = variances, y = ..density..), bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  geom_density(aes(x = variances), color = "red", size = 1) +
+  ggtitle("Sampling Distribution of Variances") +
+  theme_minimal()
+
+#plot for skewness
+ggplot(stats_df) +
+  geom_histogram(aes(x = skewnesses, y = ..density..), bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  geom_density(aes(x = skewnesses), color = "red", size = 1) +
+  ggtitle("Sampling Distribution of Skewnesses") +
+  theme_minimal()
+
+#plot for excess kurtosis
+ggplot(stats_df) +
+  geom_histogram(aes(x = kurtoses, y = ..density..), bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  geom_density(aes(x = kurtoses), color = "red", size = 1) +
+  ggtitle("Sampling Distribution of Excess Kurtoses") +
+  theme_minimal()
 
