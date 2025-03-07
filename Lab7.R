@@ -449,3 +449,61 @@ ggplot(stats_df) +
   ggtitle("Sampling Distribution of Excess Kurtoses") +
   theme_minimal()
 
+#Optional Challenge 1
+library(ggplot2)
+library(gganimate)
+library(gifski)
+
+alpha_values <- seq(1, 10, by = 1)
+beta <- 5
+
+beta_data <- data.frame(
+  x = rep(seq(0, 1, length.out = 100), times = length(alpha_values)),
+  alpha = rep(alpha_values, each = 100),
+  beta = beta
+)
+
+beta_data$y <- mapply(function(x, alpha, beta) {
+  dbeta(x, shape1 = alpha, shape2 = beta)
+}, beta_data$x, beta_data$alpha, beta_data$beta)
+
+# ggplot with animation
+p1 <- ggplot(beta_data, aes(x = x, y = y, group = alpha, color = as.factor(alpha))) +
+  geom_line() +
+  labs(title = 'Beta Distribution: α = {frame_time}', x = 'x', y = 'Density') +
+  transition_time(alpha) +
+  ease_aes('linear')
+
+animate(p1, nframes = 100, duration = 5, renderer = gifski_renderer())
+
+#optional challenge 2
+beta_values <- seq(1, 10, by = 1)
+alpha <- 5
+
+beta_data <- data.frame(
+  x = rep(seq(0, 1, length.out = 100), times = length(beta_values)),
+  alpha = alpha,
+  beta = rep(beta_values, each = 100)
+)
+
+beta_data$y <- mapply(function(x, alpha, beta) {
+  dbeta(x, shape1 = alpha, shape2 = beta)
+}, beta_data$x, beta_data$alpha, beta_data$beta)
+
+# ggplot with animation
+p2 <- ggplot(beta_data, aes(x = x, y = y, group = beta, color = as.factor(beta))) +
+  geom_line() +
+  labs(title = 'Beta Distribution: β = {frame_time}', x = 'x', y = 'Density') +
+  transition_time(beta) +
+  ease_aes('linear')
+
+animate(p2, nframes = 100, duration = 5, renderer = gifski_renderer())
+
+#optional challenge 3
+# Plot the Beta(1, 1) distribution (Uniform Distribution)
+x <- seq(0, 1, length.out = 100)
+y <- dbeta(x, shape1 = 1, shape2 = 1)
+
+ggplot(data.frame(x, y), aes(x, y)) +
+  geom_line() +
+  labs(title = "Beta(α = 1, β = 1) Distribution (Uniform)", x = "x", y = "Density")
