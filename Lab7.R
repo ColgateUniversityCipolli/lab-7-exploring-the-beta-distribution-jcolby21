@@ -507,3 +507,32 @@ y <- dbeta(x, shape1 = 1, shape2 = 1)
 ggplot(data.frame(x, y), aes(x, y)) +
   geom_line() +
   labs(title = "Beta(α = 1, β = 1) Distribution (Uniform)", x = "x", y = "Density")
+
+#Lab 8
+#Task 6
+library(readr)
+library(tidyverse)
+library(ggplot2)
+
+#load data and add desired column
+data=read_csv("deathcrudedata.csv")|>
+  mutate(col_2022_rate=data$`2022`/1000)
+
+#Calculate the sample mean and variance
+mean_rate <- mean(col_2022_rate, na.rm = TRUE)
+var_rate <- var(col_2022_rate, na.rm = TRUE)
+
+# Solving for alpha and beta using formulas
+alpha <- (mean_rate * (mean_rate * (1 - mean_rate) / var_rate - 1))
+beta <- (alpha * (1 - mean_rate) / mean_rate)
+
+#plot the data with the beta distribution
+ggplot(data, aes(x=col_2022_rate)) +
+  geom_histogram(aes(y = ..density..), bins = 30, fill = "blue", alpha = 0.5) +
+  stat_function(fun = dbeta, args = list(shape1 = alpha, shape2 = beta), 
+                color = "red", size = 1) +
+  labs(title = "Beta Distribution Fit to Country Death Rates (2022)",
+       x = "Death Rate (per 1000 citizens scaled to [0,1])",
+       y = "Density")
+
+#Task Seven
