@@ -536,3 +536,71 @@ ggplot(data, aes(x=col_2022_rate)) +
        y = "Density")
 
 #Task Seven
+library(nleqslv)
+col_2022_rate=data$col_2022_rate
+
+#Using MOM
+#first moment E(X)
+m1=mean(col_2022_rate, na.rm=T) #263 observations that are not NA
+#second moment E(X^2)
+m2=mean(col_2022_rate^2, na.rm=T) #squared xs and 263 observations that are not NA
+
+#Use equation solver to find parameters
+MOM.beta=function(data, par){
+  alpha=par[1]
+  beta=par[2]
+  
+  EX= alpha/(alpha+beta)
+  EX2= (alpha*(alpha+1))/((alpha+beta)*(alpha+beta+1))
+  return(c(EX-m1, EX2-m2)) #goal to be 0, find alpha and beta
+}
+par=c(1,1) #initial guess
+nleqslv(x=par,
+        fn = MOM.beta,
+        data=data$col_2022_rate)
+#get alpha=8.426105, beta=1003.461384
+
+#Using MLE
+
+llbeta=function(data, par, neg=F){
+  alpha=par[1]
+  beta=par[2]
+  
+  loglik=sum(log(dbeta(x=data, alpha, beta)), na.rm=T)
+  return(ifelse(neg, -loglik, loglik))
+}
+par=c(1,1) #initial guess 
+
+optim(par = par,
+      fn = llbeta,
+      data=data$col_2022_rate,
+      neg=T,
+      )
+#I got alpha=8.271409, beta=985.047671
+
+alpha_mom <- 8.426105  # Example value for alpha from MOM
+beta_mom <- 1003.461384  # Example value for beta from MOM
+alpha_mle <- 8.271409  # Example value for alpha from MLE
+beta_mle <- 985.047671   # Example value for beta from MLE
+
+#create things needed for plot
+x_vals <- seq(0, 0.02, length.out = 1000) #all x are between 0 and 0.02
+gamma_mom_pdf <- dgamma(x_vals, shape = alpha_mom, rate = beta_mom)
+gamma_mle_pdf <- dgamma(x_vals, shape = alpha_mle, rate = beta_mle)
+
+# Create a tibble to store x-values and the corresponding PDFs
+df <- tibble(
+  x = x_vals,
+  gamma_mom = gamma_mom_pdf,
+  gamma_mle = gamma_mle_pdf
+)
+
+# Plot the histogram of the data and overlay the Gamma distributions for MOM and MLE
+ggplot(data.frame(data), aes(x = col_2022_rate)) +
+  geom_histogram(aes(y = ..density..), bins = 10, fill = "lightblue", color = "black", alpha = 0.7) +
+  geom_line(data = df, aes(x = x, y = gamma_mom), color = "red", size = 1) +
+  geom_line(data = df, aes(x = x, y = gamma_mle), color = "green", size = 1) +
+  labs(title = "Histogram with Gamma Distributions", x = "Death Rate (per 1000 citizens scaled to [0,1])", y = "Density") +
+  theme_minimal()
+
+#Task Eight
