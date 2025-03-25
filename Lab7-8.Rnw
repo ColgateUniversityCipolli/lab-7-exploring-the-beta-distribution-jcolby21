@@ -1,0 +1,127 @@
+\documentclass{article}
+\usepackage{amsmath} %This allows me to use the align functionality.
+                     %If you find yourself trying to replicate
+                     %something you found online, ensure you're
+                     %loading the necessary packages!
+\usepackage{amsfonts}%Math font
+\usepackage{graphicx}%For including graphics
+\usepackage{hyperref}%For Hyperlinks
+\usepackage[shortlabels]{enumitem}% For enumerated lists with labels specified
+                                  % We had to run tlmgr_install("enumitem") in R
+\hypersetup{colorlinks = true,citecolor=black} %set citations to have black (not green) color
+\usepackage{natbib}        %For the bibliography
+\setlength{\bibsep}{0pt plus 0.3ex}
+\bibliographystyle{apalike}%For the bibliography
+\usepackage[margin=0.50in]{geometry}
+\usepackage{float}
+\usepackage{multicol}
+
+%fix for figures
+\usepackage{caption}
+\newenvironment{Figure}
+  {\par\medskip\noindent\minipage{\linewidth}}
+  {\endminipage\par\medskip}
+\begin{document}
+\title{Lab 7-8 -- MATH 240 -- Computational Statistics}
+
+\author{
+  Jackson Colby \\
+  Colgate University  \\
+  Mathematics  \\
+  {\tt jcolby@colgate.edu}
+}
+
+\date{}
+
+\maketitle
+
+\begin{multicols}{2}
+
+\section{Introduction}
+
+\section{Density Functions and Parameters}
+
+The Beta distribution with parameters \( \alpha \) and \( \beta \) is given by the probability density function:
+
+\[
+f_X(x | \alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha) \Gamma(\beta)} x^{\alpha - 1} (1 - x)^{\beta - 1}, \quad \text{for } x \in [0, 1]
+\]
+
+The probability function for the Beta distribution takes values of 0 everywhere outside of [0,1]. 
+
+
+The following plot shows the comparison between a Beta distribution with \(\alpha=5\) and \(\beta=5\) and a Gaussian distribution with the same mean and variance. This figure shows that when alpha and beta are the same or close to the same the beta distribution has a similar density to the normal distribution. If \(\alpha\) is greater than \(\beta\) then the distribution will be left skewed and if \(\alpha\) is less than \(\beta\) then the distribution will be right skewed. 
+
+<<fig=TRUE, echo=FALSE, message=FALSE, warning=FALSE,fig.width=5, fig.height=3>>=
+library(tidyverse)
+library(ggplot2)
+alpha <- 5
+beta <- 5
+
+q1.fig.dat <- tibble(x = seq(-0.25, 1.25, length.out=1000)) |>   # generate a grid of points
+  mutate(beta.pdf = dbeta(x, alpha, beta),                      # compute the beta PDF
+         norm.pdf = dnorm(x,                                    # Gaussian distribution with
+                          mean = alpha/(alpha+beta),            # same mean and variance
+                          sd = sqrt((alpha*beta)/((alpha+beta)^2*(alpha+beta+1)))))
+
+# Plot
+ggplot(data= q1.fig.dat) +                                              # specify data
+  geom_line(aes(x=x, y=beta.pdf, color="Beta(5,5)")) +                 # plot beta dist
+  geom_line(aes(x=x, y=norm.pdf, color="Gaussian")) +                  # plot Gaussian dist
+  geom_hline(yintercept=0) +                                            # plot x axis
+  theme_bw() +                                                          # change theme
+  xlab("x") +                                                           # label x axis
+  ylab("Density") +                                                     # label y axis
+  scale_color_manual("", values = c("red", "grey")) +                  # change colors
+  theme(legend.position = "bottom")
+@
+
+A table containing the four given cases is below.
+<<echo=FALSE, results='asis'>>=
+library(tidyverse)
+library(xtable)
+
+# Create the Beta function
+Beta <- function(alpha, beta) {
+  mean = alpha / (alpha + beta)
+  variance = (alpha * beta) / ((alpha + beta + 1) * (alpha + beta)^2)
+  skewness = (2 * (beta - alpha) * sqrt(alpha + beta + 1)) / ((alpha + beta + 2) * sqrt(alpha * beta))
+  kurtosis = (6 * ((alpha - beta)^2 * (alpha + beta + 1) - alpha * beta * (alpha + beta + 2))) /
+    (alpha * beta * (alpha + beta + 2) * (alpha + beta + 3))
+  return(c(alpha = alpha, beta = beta, mean = mean, variance = variance, skewness = skewness, kurtosis = kurtosis))
+}
+
+# Calculate cases
+alpha = 2; beta = 5; case_1 = Beta(alpha, beta)
+alpha = 5; beta = 5; case_2 = Beta(alpha, beta)
+alpha = 5; beta = 2; case_3 = Beta(alpha, beta)
+alpha = 0.5; beta = 0.5; case_4 = Beta(alpha, beta)
+
+# Combine results
+combined_matrix = rbind(case_1, case_2, case_3, case_4)
+results_table = as.data.frame(combined_matrix)
+colnames(results_table) = c("alpha", "beta", "mean", "variance", "skewness", "kurtosis")
+results_table$case = c("Beta(2,5)", "Beta(5,5)", "Beta(5,2)", "Beta(0.5,0.5)")
+
+one.table = xtable(results_table, caption = "Summary of Beta Distribution Statistics")
+@
+
+<<echo=FALSE, results="asis">>=
+print(one.table,
+table.placement = "H", include.rownames=FALSE, size = "small")
+@
+As seen in the table, for larger \(\alpha\) and \(\beta\) the variance is lower. All the Beta distributions are platykurtic, the graphs being more platykurtic when \(\alpha\) and \(\beta\) are the same or similar. 
+
+\section{Properties}
+
+\section{Estimators}
+
+\section{Example with Death Rates Data}
+
+\begin{tiny}
+\bibliography{bib}
+\end{tiny}
+\end{multicols}
+
+
+\end{document}

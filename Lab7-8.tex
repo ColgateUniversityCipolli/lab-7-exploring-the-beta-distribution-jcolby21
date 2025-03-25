@@ -1,0 +1,147 @@
+\documentclass{article}\usepackage[]{graphicx}\usepackage[]{xcolor}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlsng}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hldef}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage{amsmath} %This allows me to use the align functionality.
+                     %If you find yourself trying to replicate
+                     %something you found online, ensure you're
+                     %loading the necessary packages!
+\usepackage{amsfonts}%Math font
+\usepackage{graphicx}%For including graphics
+\usepackage{hyperref}%For Hyperlinks
+\usepackage[shortlabels]{enumitem}% For enumerated lists with labels specified
+                                  % We had to run tlmgr_install("enumitem") in R
+\hypersetup{colorlinks = true,citecolor=black} %set citations to have black (not green) color
+\usepackage{natbib}        %For the bibliography
+\setlength{\bibsep}{0pt plus 0.3ex}
+\bibliographystyle{apalike}%For the bibliography
+\usepackage[margin=0.50in]{geometry}
+\usepackage{float}
+\usepackage{multicol}
+
+%fix for figures
+\usepackage{caption}
+\newenvironment{Figure}
+  {\par\medskip\noindent\minipage{\linewidth}}
+  {\endminipage\par\medskip}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+\title{Lab 7-8 -- MATH 240 -- Computational Statistics}
+
+\author{
+  Jackson Colby \\
+  Colgate University  \\
+  Mathematics  \\
+  {\tt jcolby@colgate.edu}
+}
+
+\date{}
+
+\maketitle
+
+\begin{multicols}{2}
+
+\section{Introduction}
+
+\section{Density Functions and Parameters}
+
+The Beta distribution with parameters \( \alpha \) and \( \beta \) is given by the probability density function:
+
+\[
+f_X(x | \alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha) \Gamma(\beta)} x^{\alpha - 1} (1 - x)^{\beta - 1}, \quad \text{for } x \in [0, 1]
+\]
+
+The probability function for the Beta distribution takes values of 0 everywhere outside of [0,1]. 
+
+
+The following plot shows the comparison between a Beta distribution with \(\alpha=5\) and \(\beta=5\) and a Gaussian distribution with the same mean and variance. This figure shows that when alpha and beta are the same or close to the same the beta distribution has a similar density to the normal distribution. If \(\alpha\) is greater than \(\beta\) then the distribution will be left skewed and if \(\alpha\) is less than \(\beta\) then the distribution will be right skewed. 
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-1-1} 
+\end{knitrout}
+
+A table containing the four given cases is below.
+
+
+% latex table generated in R 4.4.2 by xtable 1.8-4 package
+% Tue Mar 25 15:48:10 2025
+\begin{table}[H]
+\centering
+\begingroup\small
+\begin{tabular}{rrrrrrl}
+  \hline
+alpha & beta & mean & variance & skewness & kurtosis & case \\ 
+  \hline
+2.00 & 5.00 & 0.29 & 0.03 & 0.60 & -0.12 & Beta(2,5) \\ 
+  5.00 & 5.00 & 0.50 & 0.02 & 0.00 & -0.46 & Beta(5,5) \\ 
+  5.00 & 2.00 & 0.71 & 0.03 & -0.60 & -0.12 & Beta(5,2) \\ 
+  0.50 & 0.50 & 0.50 & 0.12 & 0.00 & -1.50 & Beta(0.5,0.5) \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption{Summary of Beta Distribution Statistics} 
+\end{table}
+
+As seen in the table, for larger \(\alpha\) and \(\beta\) the variance is lower. All the Beta distributions are platykurtic, the graphs being more platykurtic when \(\alpha\) and \(\beta\) are the same or similar. 
+
+\section{Properties}
+
+\section{Estimators}
+
+\section{Example with Death Rates Data}
+
+\begin{tiny}
+\bibliography{bib}
+\end{tiny}
+\end{multicols}
+
+
+\end{document}
