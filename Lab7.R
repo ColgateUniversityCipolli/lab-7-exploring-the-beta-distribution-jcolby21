@@ -24,7 +24,7 @@ q1.fig.dat <- tibble(x = seq(-0.25, 1.25, length.out=1000))|>   # generate a gri
 
 ggplot(data= q1.fig.dat)+                                              # specify data
   geom_line(aes(x=x, y=beta.pdf, color="Beta(2,5)")) +                 # plot beta dist
-  geom_line(aes(x=x, y=norm.pdf, color="Gaussian(0.2857, 0.0255)")) +  # plot guassian dist
+  geom_line(aes(x=x, y=norm.pdf, color="Gaussian(0.2857, 0.0255)")) +  # plot gaussian dist
   geom_hline(yintercept=0)+                                            # plot x axis
   theme_bw()+                                                          # change theme
   xlab("x")+                                                           # label x axis
@@ -355,7 +355,7 @@ grid_plot = p_mean + p_variance + p_skewness + p_kurtosis + plot_layout(ncol = 2
 print(grid_plot)
 
 
-#Write a for loop to simulate new data, add new line for iterations 2-50
+#create a for loop
 alpha=2
 beta=5
 n=500
@@ -383,7 +383,7 @@ for (i in 2:50) {
   }
 #combines new plots into 2x2
 new_grid_plot= p_mean + p_variance + p_skewness + p_kurtosis + plot_layout(ncol = 2)
-# Show the final plot with simulated data lines
+# Prints plot
 print(new_grid_plot)
 
 #Task Five
@@ -516,11 +516,11 @@ library(ggplot2)
 
 #load data and add desired column
 data=read_csv("deathcrudedata.csv")|>
-  mutate(col_2022_rate=data$`2022`/1000)
+  mutate(col_2022_rate=`2022`/1000)
 
 #Calculate the sample mean and variance
-mean_rate <- mean(col_2022_rate, na.rm = TRUE)
-var_rate <- var(col_2022_rate, na.rm = TRUE)
+mean_rate <- mean(data$col_2022_rate, na.rm = TRUE)
+var_rate <- var(data$col_2022_rate, na.rm = TRUE)
 
 # Solving for alpha and beta using formulas
 alpha <- (mean_rate * (mean_rate * (1 - mean_rate) / var_rate - 1))
@@ -540,13 +540,16 @@ library(nleqslv)
 col_2022_rate=data$col_2022_rate
 
 #Using MOM
-#first moment E(X)
+#for the first example
+#first moment E(X)]
 m1=mean(col_2022_rate, na.rm=T) #263 observations that are not NA
 #second moment E(X^2)
 m2=mean(col_2022_rate^2, na.rm=T) #squared xs and 263 observations that are not NA
 
 #Use equation solver to find parameters
 MOM.beta=function(data, par){
+  m1=mean(data, na.rm=T)
+  m2=mean(data^2, na.rm=T)
   alpha=par[1]
   beta=par[2]
   
@@ -585,22 +588,118 @@ beta_mle <- 985.047671   # Example value for beta from MLE
 
 #create things needed for plot
 x_vals <- seq(0, 0.02, length.out = 1000) #all x are between 0 and 0.02
-gamma_mom_pdf <- dgamma(x_vals, shape = alpha_mom, rate = beta_mom)
-gamma_mle_pdf <- dgamma(x_vals, shape = alpha_mle, rate = beta_mle)
+beta_mom_pdf <- dbeta(x_vals, shape1 = alpha_mom, shape2 = beta_mom)
+beta_mle_pdf <- dbeta(x_vals, shape1 = alpha_mle, shape2 = beta_mle)
 
 # Create a tibble to store x-values and the corresponding PDFs
 df <- tibble(
   x = x_vals,
-  gamma_mom = gamma_mom_pdf,
-  gamma_mle = gamma_mle_pdf
+  beta_mom = beta_mom_pdf,
+  beta_mle = beta_mle_pdf
 )
 
-# Plot the histogram of the data and overlay the Gamma distributions for MOM and MLE
+# Plot the histogram of the data and overlay the beta distributions for MOM and MLE
 ggplot(data.frame(data), aes(x = col_2022_rate)) +
   geom_histogram(aes(y = ..density..), bins = 10, fill = "lightblue", color = "black", alpha = 0.7) +
-  geom_line(data = df, aes(x = x, y = gamma_mom), color = "red", size = 1) +
-  geom_line(data = df, aes(x = x, y = gamma_mle), color = "green", size = 1) +
-  labs(title = "Histogram with Gamma Distributions", x = "Death Rate (per 1000 citizens scaled to [0,1])", y = "Density") +
+  geom_line(data = df, aes(x = x, y = beta_mom), color = "red", size = 1) +
+  geom_line(data = df, aes(x = x, y = beta_mle), color = "green", size = 1) +
+  labs(title = "Histogram with Beta Distributions", x = "Death Rate (per 1000 citizens scaled to [0,1])", y = "Density") +
   theme_minimal()
 
 #Task Eight
+alpha=8
+beta=950
+n=266
+
+momalpha=numeric()
+mombeta=numeric()
+mlealpha=numeric()
+mlebeta=numeric()
+
+for (i in 1:1000){
+  set.seed(7272+i)
+  beta.sample <- rbeta(n = n,  # sample size
+                     shape1 = alpha,   # alpha parameter
+                     shape2 = beta)    # beta parameter
+  par=c(1,1) #initial guess
+  momsol=nleqslv(x=par,
+          fn = MOM.beta,
+          data=beta.sample)
+  momalpha= c(momalpha, momsol$x[1])
+  mombeta= c(mombeta, momsol$x[2])
+  par=c(1,1) #initial guess 
+  mlesol=optim(par = par,
+        fn = llbeta,
+        data=beta.sample,
+        neg=T,
+  )
+  mlealpha=c(mlealpha, mlesol$par[1])
+  mlebeta=c(mlebeta, mlesol$par[2])
+}
+
+
+taskeighttibble= tibble(mlealpha=mlealpha, mlebeta=mlebeta, 
+                        momalpha=momalpha, mombeta=mombeta)
+
+alpha_mom_plot <- ggplot(taskeighttibble) +
+  geom_density(aes(x = momalpha), fill = "blue", alpha = 0.5) +
+  labs(title = "Density of Alpha (MOM)", 
+       x = "Alpha Estimate", y = "Density") +
+  theme_minimal()
+
+alpha_mle_plot <- ggplot(taskeighttibble) +
+  geom_density(aes(x = mlealpha), fill = "red", alpha = 0.5) +
+  labs(title = "Density of Alpha (MLE)", 
+       x = "Alpha Estimate", y = "Density") +
+  theme_minimal()
+
+beta_mom_plot <- ggplot(taskeighttibble) +
+  geom_density(aes(x = mombeta), fill = "blue", alpha = 0.5) +
+  labs(title = "Density of Beta (MOM)", 
+       x = "Beta Estimate", y = "Density") +
+  theme_minimal()
+
+beta_mle_plot <- ggplot(taskeighttibble) +
+  geom_density(aes(x = mlebeta), fill = "red", alpha = 0.5) +
+  labs(title = "Density of Beta (MLE)", 
+       x = "Beta Estimate", y = "Density") +
+  theme_minimal()
+
+library(patchwork)
+#combines the plots into a 2x2 grid
+alpha_mom_plot + alpha_mle_plot + beta_mom_plot + beta_mle_plot + 
+  plot_layout(ncol = 2, nrow = 2)
+
+
+# Calculate Bias, Precision, and MSE for alpha
+bias_mom_alpha <- mean(momalpha) - alpha
+bias_mle_alpha <- mean(mlealpha) - alpha
+var_mom_alpha <- var(momalpha)
+var_mle_alpha <- var(mlealpha)
+
+precision_mom_alpha <- 1 / var_mom_alpha
+precision_mle_alpha <- 1 / var_mle_alpha
+
+mse_mom_alpha <- var_mom_alpha + bias_mom_alpha^2
+mse_mle_alpha <- var_mle_alpha + bias_mle_alpha^2
+
+# Calculate Bias, Precision, and MSE for beta
+bias_mom_beta <- mean(mombeta) - beta
+bias_mle_beta <- mean(mlebeta) - beta
+var_mom_beta <- var(mombeta)
+var_mle_beta <- var(mlebeta)
+
+precision_mom_beta <- 1 / var_mom_beta
+precision_mle_beta <- 1 / var_mle_beta
+
+mse_mom_beta <- var_mom_beta + bias_mom_beta^2
+mse_mle_beta <- var_mle_beta + bias_mle_beta^2
+
+# Create a table for bias, precision, and MSE
+dt <- tibble(
+  Parameter = c("Alpha", "Beta", "Alpha", "Beta"),
+  Method = c("MOM", "MOM", "MLE", "MLE"),
+  Bias = c(bias_mom_alpha, bias_mom_beta, bias_mle_alpha, bias_mle_beta),
+  Precision = c(precision_mom_alpha, precision_mom_beta, precision_mle_alpha, precision_mle_beta),
+  MSE = c(mse_mom_alpha, mse_mom_beta, mse_mle_alpha, mse_mle_beta)
+)
