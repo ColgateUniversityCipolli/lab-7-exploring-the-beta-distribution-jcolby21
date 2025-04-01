@@ -112,7 +112,7 @@ A table containing the four given cases is below.
 
 
 % latex table generated in R 4.4.2 by xtable 1.8-4 package
-% Mon Mar 31 22:57:32 2025
+% Tue Apr  1 00:01:17 2025
 \begin{table}[H]
 \centering
 \begingroup\small
@@ -154,16 +154,82 @@ The excess kurtosis is given by:
 A function called beta.moment was utilized to test both centered and uncentered moments of the population-level characteristics to the approximations calculated. 
 
 For the case alpha=2, beta=5: the statistics using the population level were mean=0.285714, var=0.0255102, skew=0.047619, kurt=0.001874.
-These statistics compared to the table above are very close to the values of the approximation, meaning the characteristics described above are true for the Beta Distribtuion.
+These statistics compared to the table above are very close to the values of the approximation, meaning the characteristics described above are true for the Beta Distribution.
 
 \section{Estimators}
+For the case where alpha=2 and beta=5, the following summary statistics were calculated for a sample of 500.
+
+
+
+% latex table generated in R 4.4.2 by xtable 1.8-4 package
+% Tue Apr  1 00:01:17 2025
+\begin{table}[H]
+\centering
+\begingroup\small
+\begin{tabular}{rrrr}
+  \hline
+mean\_sample & variance\_sample & skewness\_sample & kurtosis\_sample \\ 
+  \hline
+0.29 & 0.03 & 0.57 & -0.23 \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption{Summary Statistics for Beta Sample} 
+\end{table}
+
+
+Below is a distribution showing the estimated density and the actual Beta Distribtuion over the sample.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=0.4\textwidth,height=0.2\textheight]{figure/plot_beta_sample-1} 
+\end{knitrout}
+
+As seen in the plot, the estimated density does a good job of fitting the data, and fits similarly compared to the actual Beta(2,5) Distribution.
+
+Utilizing the packages cumstats \citep{cumstats} and patchwork \citep{patchwork}, we created plots that tracked the path of the summary statistics for different samples as n goes to 500.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-5-1} 
+\end{knitrout}
+
+As seen in the plot above, as n (the sample size), gets larger all the samples converge to the same values meaning that any random sample is sufficient for calculating the mean, variance, etc.  of the Beta Distribution, and the sample size is important because the larger sample size leads to a better approximation.
+
+The variation of the mean, variance, etc. can be shown in the plots below in the Appendix.
+All four of the plots follow close to normal distributions, showing that the samples of all mean, variance, etc. follow close to a Gaussian distribution, forming a bell shaped curve.
 
 \section{Example with Death Rates Data}
+
+
+
 
 \begin{tiny}
 \bibliography{bib}
 \end{tiny}
 \end{multicols}
+
+\newpage
+
+\section{Appendix}
+\subsection{Estimators}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-6-1} 
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-7-1} 
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-8-1} 
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-9-1} 
+\end{knitrout}
 
 
 \end{document}

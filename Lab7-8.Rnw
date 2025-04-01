@@ -133,16 +133,351 @@ The excess kurtosis is given by:
 A function called beta.moment was utilized to test both centered and uncentered moments of the population-level characteristics to the approximations calculated. 
 
 For the case alpha=2, beta=5: the statistics using the population level were mean=0.285714, var=0.0255102, skew=0.047619, kurt=0.001874.
-These statistics compared to the table above are very close to the values of the approximation, meaning the characteristics described above are true for the Beta Distribtuion.
+These statistics compared to the table above are very close to the values of the approximation, meaning the characteristics described above are true for the Beta Distribution.
 
 \section{Estimators}
+For the case where alpha=2 and beta=5, the following summary statistics were calculated for a sample of 500.
+
+
+<<summary_stats_case_1, echo=FALSE, results='asis'>>=
+library(e1071)
+library(tibble)
+library(xtable)
+
+# Set seed and parameters for sampling
+set.seed(7272)
+sample.size <- 500
+alpha <- 2
+beta <- 5
+
+# Generate beta sample
+beta.sample <- rbeta(n = sample.size, shape1 = alpha, shape2 = beta)
+
+# Summary statistics for the Beta sample
+summary_stats_case_1 <- tibble(data = beta.sample) |>
+  summarize(
+    mean_sample = mean(data),
+    variance_sample = var(data),
+    skewness_sample = skewness(data),
+    kurtosis_sample = kurtosis(data)  # Excess kurtosis
+  )
+
+# Convert the summary statistics tibble to a LaTeX table
+two.table=xtable(summary_stats_case_1, caption = "Summary Statistics for Beta Sample")
+@
+<<echo=FALSE, results="asis">>=
+print(two.table,
+table.placement = "H", include.rownames=FALSE, size = "small")
+@
+
+Below is a distribution showing the estimated density and the actual Beta Distribtuion over the sample.
+<<plot_beta_sample, echo=F, fig=T, out.width="0.4\\textwidth", out.height="0.2\\textheight">>=
+library(e1071)  # for skewness and kurtosis
+library(ggplot2)
+library(tibble)
+
+# Set seed and parameters for sampling
+set.seed(7272)
+sample.size <- 500
+alpha <- 2
+beta <- 5
+
+# Generate beta sample
+beta.sample <- rbeta(n = sample.size, shape1 = alpha, shape2 = beta)
+
+# Create a data frame for plotting
+data_case_1 <- tibble(data_case_1 = beta.sample)
+
+# Plot the histogram, density estimate, and Beta(2,5) distribution
+ggplot(data_case_1, aes(x = data_case_1)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "lightblue", color = "black", alpha = 0.6) +
+  stat_density(aes(color = "Estimated Density"), linewidth = 1, geom = "line") +
+  stat_function(
+    fun = dbeta, args = list(shape1 = alpha, shape2 = beta), 
+    linewidth = 1, aes(color = "Beta(2, 5) Distribution")
+  ) +
+  labs(
+    title = "Histogram and Density of Beta Sample with Beta(2, 5) Distribution",
+    x = "x",
+    y = "Density"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+@
+
+As seen in the plot, the estimated density does a good job of fitting the data, and fits similarly compared to the actual Beta(2,5) Distribution.
+
+Utilizing the packages cumstats \citep{cumstats} and patchwork \citep{patchwork}, we created plots that tracked the path of the summary statistics for different samples as n goes to 500.
+<<echo=FALSE, results='hide', warning=FALSE, message=FALSE, fig.width=5, fig.height=3>>=
+library(tidyverse)
+library(cumstats)
+library(patchwork)
+library(ggplot2)
+
+
+#create a function that takes alpha and beta as inputs and computes the 
+#mean, variance, skewness, and excess kurtosis
+Beta = function(alpha, beta){
+mean=alpha/(alpha+beta)
+variance= (alpha*beta)/((alpha+beta+1)*(alpha+beta)^2)
+skewness= (2*(beta-alpha)*sqrt(alpha+beta+1))/((alpha+beta+2)*sqrt(alpha*beta))
+kurtosis= ((6*((alpha-beta)^2*(alpha+beta+1)-alpha*beta*(alpha+beta+2)))/(alpha*beta*(alpha+beta+2)*(alpha+beta+3)))
+return(c(alpha=alpha, beta=beta, mean = mean, variance = variance, skewness = skewness, kurtosis = kurtosis))
+}
+alpha = 2
+beta = 5
+set.seed(7272)
+n <- 500
+
+# Generate the initial beta sample
+beta.sample <- rbeta(n, alpha, beta)
+
+# Create the cumulative statistics dataframe
+cum_stats_df <- data.frame(
+  x = 1:n,
+  mean = cummean(beta.sample),
+  variance = cumvar(beta.sample),
+  skewness = cumskew(beta.sample),
+  kurtosis = cumkurt(beta.sample) - 3
+)
+
+# real values (case_1 represents theoretical Beta distribution)
+case_1 = Beta(alpha, beta)
+
+# Initial plots for mean, variance, skewness, kurtosis
+p_mean <- ggplot(cum_stats_df, aes(x = x, y = mean)) +
+  geom_line() +
+  geom_hline(yintercept = case_1[3], linetype = 'dashed', color = 'red') +
+  labs(title = 'Cumulative Mean')
+
+p_variance <- ggplot(cum_stats_df, aes(x = x, y = variance)) +
+  geom_line() +
+  geom_hline(yintercept = case_1[4], linetype = 'dashed', color = 'red') +
+  labs(title = 'Cumulative Variance')
+
+p_skewness <- ggplot(cum_stats_df, aes(x = x, y = skewness)) +
+  geom_line() +
+  geom_hline(yintercept = case_1[5], linetype = 'dashed', color = 'red') +
+  labs(title = 'Cumulative Skewness')
+
+p_kurtosis <- ggplot(cum_stats_df, aes(x = x, y = kurtosis)) +
+  geom_line() +
+  geom_hline(yintercept = case_1[6], linetype = 'dashed', color = 'red') +
+  labs(title = 'Cumulative Kurtosis')
+
+# Combine initial plots into a 2x2 grid
+grid_plot <- p_mean + p_variance + p_skewness + p_kurtosis + plot_layout(ncol = 2)
+
+# Loop to add new data for plots and update cumulative statistics
+for (i in 2:50) {
+  set.seed(7272 + i)
+  new_data <- rbeta(n, alpha, beta)
+  new_cum_stats_df <- data.frame(
+    x = 1:n,
+    mean = cummean(new_data),
+    variance = cumvar(new_data),
+    skewness = cumskew(new_data),
+    kurtosis = cumkurt(new_data) - 3
+  )
+  
+  # Add new lines for the statistics
+  p_mean <- p_mean + geom_line(data = new_cum_stats_df, aes(x = x, y = mean), color = i)
+  p_variance <- p_variance + geom_line(data = new_cum_stats_df, aes(x = x, y = variance), color = i)
+  p_skewness <- p_skewness + geom_line(data = new_cum_stats_df, aes(x = x, y = skewness), color = i)
+  p_kurtosis <- p_kurtosis + geom_line(data = new_cum_stats_df, aes(x = x, y = kurtosis), color = i)
+}
+
+# Combine updated plots into a 2x2 grid
+new_grid_plot <- p_mean + p_variance + p_skewness + p_kurtosis + plot_layout(ncol = 2)
+new_grid_plot
+@
+
+As seen in the plot above, as n (the sample size), gets larger all the samples converge to the same values meaning that any random sample is sufficient for calculating the mean, variance, etc.  of the Beta Distribution, and the sample size is important because the larger sample size leads to a better approximation.
+
+The variation of the mean, variance, etc. can be shown in the plots below in the Appendix.
+All four of the plots follow close to normal distributions, showing that the samples of all mean, variance, etc. follow close to a Gaussian distribution, forming a bell shaped curve.
 
 \section{Example with Death Rates Data}
+
+
+
 
 \begin{tiny}
 \bibliography{bib}
 \end{tiny}
 \end{multicols}
+
+\newpage
+
+\section{Appendix}
+\subsection{Estimators}
+<<echo=FALSE, message=FALSE, warning=FALSE, fig.width=4, fig.height=2>>=
+library(tidyverse)
+library(ggplot2)
+library(moments)
+n=500
+alpha=2
+beta=5
+
+#creates blank data frame to store data with 1000 entries
+means <- numeric(1000)
+variances <- numeric(1000)
+skewnesses <- numeric(1000)
+kurtoses <- numeric(1000)
+
+# Loop to generate the data and compute statistics
+for (i in 1:1000) {
+  set.seed(7272 + i)  # set seed
+  
+  # Simulate data from the Beta distribution
+  data <- rbeta(n, shape1 = alpha, shape2 = beta)
+  
+  # Compute statistics
+  means[i] <- mean(data)
+  variances[i] <- var(data)
+  skewnesses[i] <- skewness(data)
+  kurtoses[i] <- kurtosis(data) - 3  # Excess kurtosis is kurtosis - 3
+}
+
+# Create a data frame with the statistics
+stats_df <- data.frame(
+  means = means,
+  variances = variances,
+  skewnesses = skewnesses,
+  kurtoses = kurtoses
+)
+ggplot(stats_df) +
+  geom_histogram(aes(x = means, y = after_stat(density)), bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  geom_density(aes(x = means), color = "red", linewidth = 1) +
+  ggtitle("Sampling Distribution of Means") +
+  theme_minimal()
+@
+
+<<echo=FALSE, message=FALSE, warning=FALSE, fig.width=4, fig.height=2>>=
+library(tidyverse)
+library(ggplot2)
+library(moments)
+n=500
+alpha=2
+beta=5
+
+#creates blank data frame to store data with 1000 entries
+means <- numeric(1000)
+variances <- numeric(1000)
+skewnesses <- numeric(1000)
+kurtoses <- numeric(1000)
+
+# Loop to generate the data and compute statistics
+for (i in 1:1000) {
+  set.seed(7272 + i)  # set seed
+  
+  # Simulate data from the Beta distribution
+  data <- rbeta(n, shape1 = alpha, shape2 = beta)
+  
+  # Compute statistics
+  means[i] <- mean(data)
+  variances[i] <- var(data)
+  skewnesses[i] <- skewness(data)
+  kurtoses[i] <- kurtosis(data) - 3  # Excess kurtosis is kurtosis - 3
+}
+
+# Create a data frame with the statistics
+stats_df <- data.frame(
+  means = means,
+  variances = variances,
+  skewnesses = skewnesses,
+  kurtoses = kurtoses
+)
+ggplot(stats_df) +
+  geom_histogram(aes(x = variances, y = after_stat(density)), bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  geom_density(aes(x = variances), color = "red", linewidth = 1) +
+  ggtitle("Sampling Distribution of Variances") +
+  theme_minimal()
+@
+
+<<echo=FALSE,message=FALSE, warning=FALSE, fig.width=4, fig.height=2>>=
+library(tidyverse)
+library(ggplot2)
+library(moments)
+n=500
+alpha=2
+beta=5
+
+#creates blank data frame to store data with 1000 entries
+means <- numeric(1000)
+variances <- numeric(1000)
+skewnesses <- numeric(1000)
+kurtoses <- numeric(1000)
+
+# Loop to generate the data and compute statistics
+for (i in 1:1000) {
+  set.seed(7272 + i)  # set seed
+  
+  # Simulate data from the Beta distribution
+  data <- rbeta(n, shape1 = alpha, shape2 = beta)
+  
+  # Compute statistics
+  means[i] <- mean(data)
+  variances[i] <- var(data)
+  skewnesses[i] <- skewness(data)
+  kurtoses[i] <- kurtosis(data) - 3  # Excess kurtosis is kurtosis - 3
+}
+
+# Create a data frame with the statistics
+stats_df <- data.frame(
+  means = means,
+  variances = variances,
+  skewnesses = skewnesses,
+  kurtoses = kurtoses
+)
+ggplot(stats_df) +
+  geom_histogram(aes(x = skewnesses, y = after_stat(density)), bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  geom_density(aes(x = skewnesses), color = "red", linewidth = 1) +
+  ggtitle("Sampling Distribution of Skewnesses") +
+  theme_minimal()
+@
+
+<<echo=FALSE, message=FALSE, warning=FALSE, fig.width=4, fig.height=2>>=
+library(tidyverse)
+library(ggplot2)
+library(moments)
+n=500
+alpha=2
+beta=5
+
+#creates blank data frame to store data with 1000 entries
+means <- numeric(1000)
+variances <- numeric(1000)
+skewnesses <- numeric(1000)
+kurtoses <- numeric(1000)
+
+# Loop to generate the data and compute statistics
+for (i in 1:1000) {
+  set.seed(7272 + i)  # set seed
+  
+  # Simulate data from the Beta distribution
+  data <- rbeta(n, shape1 = alpha, shape2 = beta)
+  
+  # Compute statistics
+  means[i] <- mean(data)
+  variances[i] <- var(data)
+  skewnesses[i] <- skewness(data)
+  kurtoses[i] <- kurtosis(data) - 3  # Excess kurtosis is kurtosis - 3
+}
+
+# Create a data frame with the statistics
+stats_df <- data.frame(
+  means = means,
+  variances = variances,
+  skewnesses = skewnesses,
+  kurtoses = kurtoses
+)
+ggplot(stats_df) +
+  geom_histogram(aes(x = kurtoses, y = after_stat(density)), bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  geom_density(aes(x = kurtoses), color = "red", linewidth = 1) +
+  ggtitle("Sampling Distribution of Excess Kurtoses") +
+  theme_minimal()
+@
 
 
 \end{document}
