@@ -112,18 +112,18 @@ A table containing the four given cases is below.
 
 
 % latex table generated in R 4.4.2 by xtable 1.8-4 package
-% Tue Mar 25 15:48:10 2025
+% Mon Mar 31 22:57:32 2025
 \begin{table}[H]
 \centering
 \begingroup\small
-\begin{tabular}{rrrrrrl}
+\begin{tabular}{rrrrrr}
   \hline
-alpha & beta & mean & variance & skewness & kurtosis & case \\ 
+alpha & beta & mean & variance & skewness & kurtosis \\ 
   \hline
-2.00 & 5.00 & 0.29 & 0.03 & 0.60 & -0.12 & Beta(2,5) \\ 
-  5.00 & 5.00 & 0.50 & 0.02 & 0.00 & -0.46 & Beta(5,5) \\ 
-  5.00 & 2.00 & 0.71 & 0.03 & -0.60 & -0.12 & Beta(5,2) \\ 
-  0.50 & 0.50 & 0.50 & 0.12 & 0.00 & -1.50 & Beta(0.5,0.5) \\ 
+2.00 & 5.00 & 0.29 & 0.03 & 0.60 & -0.12 \\ 
+  5.00 & 5.00 & 0.50 & 0.02 & 0.00 & -0.46 \\ 
+  5.00 & 2.00 & 0.71 & 0.03 & -0.60 & -0.12 \\ 
+  0.50 & 0.50 & 0.50 & 0.12 & 0.00 & -1.50 \\ 
    \hline
 \end{tabular}
 \endgroup
@@ -133,6 +133,28 @@ alpha & beta & mean & variance & skewness & kurtosis & case \\
 As seen in the table, for larger \(\alpha\) and \(\beta\) the variance is lower. All the Beta distributions are platykurtic, the graphs being more platykurtic when \(\alpha\) and \(\beta\) are the same or similar. 
 
 \section{Properties}
+The population level properties for the Beta Distribution are as follows:
+The mean is given by:
+\[
+E(X) = \frac{\alpha}{\alpha + \beta}
+\]
+The variance is given by:
+\[
+\text{Var}(X) = \frac{\alpha \beta}{(\alpha + \beta)^2 (\alpha + \beta + 1)}
+\]
+The skewness is given by:
+\[
+\text{Skew}(X) = \frac{2(\beta - \alpha)}{(\alpha + \beta + 1)\sqrt{(\alpha + \beta + 2)\alpha \beta}}
+\]
+The excess kurtosis is given by:
+\[
+\text{Kurt}(X) = \frac{6(\alpha - \beta)^2}{(\alpha + \beta + 1)\left(\alpha + \beta + 2\right)} - \frac{\alpha \beta (\alpha + \beta + 2)}{\alpha \beta (\alpha + \beta + 2)(\alpha + \beta + 3)}
+\]
+
+A function called beta.moment was utilized to test both centered and uncentered moments of the population-level characteristics to the approximations calculated. 
+
+For the case alpha=2, beta=5: the statistics using the population level were mean=0.285714, var=0.0255102, skew=0.047619, kurt=0.001874.
+These statistics compared to the table above are very close to the values of the approximation, meaning the characteristics described above are true for the Beta Distribtuion.
 
 \section{Estimators}
 
