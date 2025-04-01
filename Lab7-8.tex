@@ -90,6 +90,9 @@
 
 \section{Introduction}
 
+The Beta Distribution is a widely used probability distribution used to model a random variable X that ranges from 0 to 1. This property makes the Beta Distribution useful for modeling proportions, probabilities, or rates. The Distribution takes in two parameters \( \alpha \) and \( \beta \), both greater than 0 and is flexible with regards to its shape and skewness. In this report, we’ll take a deeper look at the Beta distribution, exploring its key properties, how it is parameterized, and how we can estimate its parameters using two common methods: the Method of Moments (MOM) and Maximum Likelihood Estimation (MLE). We’ll also apply the Beta distribution to a real-life example involving death rates data to demonstrate how it can be used in practice.
+
+
 \section{Density Functions and Parameters}
 
 The Beta distribution with parameters \( \alpha \) and \( \beta \) is given by the probability density function:
@@ -112,7 +115,7 @@ A table containing the four given cases is below.
 
 
 % latex table generated in R 4.4.2 by xtable 1.8-4 package
-% Tue Apr  1 00:01:17 2025
+% Tue Apr  1 12:27:25 2025
 \begin{table}[H]
 \centering
 \begingroup\small
@@ -162,7 +165,7 @@ For the case where alpha=2 and beta=5, the following summary statistics were cal
 
 
 % latex table generated in R 4.4.2 by xtable 1.8-4 package
-% Tue Apr  1 00:01:17 2025
+% Tue Apr  1 12:27:25 2025
 \begin{table}[H]
 \centering
 \begingroup\small
@@ -198,9 +201,9 @@ The variation of the mean, variance, etc. can be shown in the plots below in the
 All four of the plots follow close to normal distributions, showing that the samples of all mean, variance, etc. follow close to a Gaussian distribution, forming a bell shaped curve.
 
 \section{Example with Death Rates Data}
+This lab conducted an example using data from the World Bank for country death rates worldwide. We modeled this data using the Beta Distribution. 
 
-
-
+Utilizing the 2x2 plot and table in the Appendix, you can notice that the MOM and MLE follow similar trends to the previous cases, their values being nearly normally distributed for both alpha and beta. The table states that the MLE has less bias but also less precision and lower MSE. This is hard to tell in the plot, but the data does seem a little more spread out on the MOM plots, whereas the MLE plots are slightly more condensed on the actual value.
 
 \begin{tiny}
 \bibliography{bib}
@@ -230,6 +233,32 @@ All four of the plots follow close to normal distributions, showing that the sam
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 \includegraphics[width=\maxwidth]{figure/unnamed-chunk-9-1} 
 \end{knitrout}
+
+\subsection{Example}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-10-1} 
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-11-1} 
+\end{knitrout}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{llrrr}
+  \hline
+Parameter & Method & Bias & Precision & MSE \\ 
+  \hline
+Alpha & MOM & 0.08 & 1.83 & 0.55 \\ 
+  Beta & MOM & 10.29 & 0.00 & 8288.46 \\ 
+  Alpha & MLE & 0.07 & 2.13 & 0.48 \\ 
+  Beta & MLE & 9.11 & 0.00 & 7132.70 \\ 
+   \hline
+\end{tabular}
+\caption{Bias, Precision, and MSE for Alpha and Beta Estimations} 
+\end{table}
 
 
 \end{document}

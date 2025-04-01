@@ -39,6 +39,9 @@
 
 \section{Introduction}
 
+The Beta Distribution is a widely used probability distribution used to model a random variable X that ranges from 0 to 1. This property makes the Beta Distribution useful for modeling proportions, probabilities, or rates. The Distribution takes in two parameters \( \alpha \) and \( \beta \), both greater than 0 and is flexible with regards to its shape and skewness. In this report, we’ll take a deeper look at the Beta distribution, exploring its key properties, how it is parameterized, and how we can estimate its parameters using two common methods: the Method of Moments (MOM) and Maximum Likelihood Estimation (MLE). We’ll also apply the Beta distribution to a real-life example involving death rates data to demonstrate how it can be used in practice.
+
+
 \section{Density Functions and Parameters}
 
 The Beta distribution with parameters \( \alpha \) and \( \beta \) is given by the probability density function:
@@ -298,9 +301,9 @@ The variation of the mean, variance, etc. can be shown in the plots below in the
 All four of the plots follow close to normal distributions, showing that the samples of all mean, variance, etc. follow close to a Gaussian distribution, forming a bell shaped curve.
 
 \section{Example with Death Rates Data}
+This lab conducted an example using data from the World Bank for country death rates worldwide. We modeled this data using the Beta Distribution. 
 
-
-
+Utilizing the 2x2 plot and table in the Appendix, you can notice that the MOM and MLE follow similar trends to the previous cases, their values being nearly normally distributed for both alpha and beta. The table states that the MLE has less bias but also less precision and lower MSE. This is hard to tell in the plot, but the data does seem a little more spread out on the MOM plots, whereas the MLE plots are slightly more condensed on the actual value.
 
 \begin{tiny}
 \bibliography{bib}
@@ -479,5 +482,221 @@ ggplot(stats_df) +
   theme_minimal()
 @
 
+\subsection{Example}
+<<echo=FALSE, fig=TRUE, message=FALSE, warning=FALSE, fig.width=4, fig.height=2>>=
+library(tidyverse)
+library(ggplot2)
+
+alpha_mom <- 8.426105  # Example value for alpha from MOM
+beta_mom <- 1003.461384  # Example value for beta from MOM
+alpha_mle <- 8.271409  # Example value for alpha from MLE
+beta_mle <- 985.047671   # Example value for beta from MLE
+
+# Create things needed for the plot
+x_vals <- seq(0, 0.02, length.out = 1000)  # All x-values are between 0 and 0.02
+beta_mom_pdf <- dbeta(x_vals, shape1 = alpha_mom, shape2 = beta_mom)
+beta_mle_pdf <- dbeta(x_vals, shape1 = alpha_mle, shape2 = beta_mle)
+
+# Create a tibble to store x-values and the corresponding PDFs
+df <- tibble(
+  x = x_vals,
+  beta_mom = beta_mom_pdf,
+  beta_mle = beta_mle_pdf
+)
+
+data=read_csv("deathcrudedata.csv")|>
+  mutate(col_2022_rate=`2022`/1000)
+
+ggplot(data.frame(data), aes(x = col_2022_rate)) +
+  geom_histogram(aes(y = ..density..), bins = 10, fill = "lightblue", color = "black", alpha = 0.7) +
+  geom_line(data = df, aes(x = x, y = beta_mom), color = "red", size = 1) +
+  geom_line(data = df, aes(x = x, y = beta_mle), color = "green", size = 1) +
+  labs(title = "Histogram with Beta Distributions", x = "Death Rate (per 1000 citizens scaled to [0,1])", y = "Density") +
+  theme_minimal()
+@
+
+<<echo=FALSE, message=FALSE, results='hide', warning=FALSE, fig.width=6, fig.height=4>>=
+library(tidyverse)
+library(ggplot2)
+library(patchwork)
+library(nleqslv)
+data=read_csv("deathcrudedata.csv")|>
+  mutate(col_2022_rate=`2022`/1000)
+
+col_2022_rate=data$col_2022_rate
+
+#Using MOM
+#for the first example
+#first moment E(X)]
+m1=mean(col_2022_rate, na.rm=T) #263 observations that are not NA
+#second moment E(X^2)
+m2=mean(col_2022_rate^2, na.rm=T) #squared xs and 263 observations that are not NA
+
+#Use equation solver to find parameters
+MOM.beta=function(data, par){
+  m1=mean(data, na.rm=T)
+  m2=mean(data^2, na.rm=T)
+  alpha=par[1]
+  beta=par[2]
+  
+  EX= alpha/(alpha+beta)
+  EX2= (alpha*(alpha+1))/((alpha+beta)*(alpha+beta+1))
+  return(c(EX-m1, EX2-m2)) #goal to be 0, find alpha and beta
+}
+par=c(1,1) #initial guess
+nleqslv(x=par,
+        fn = MOM.beta,
+        data=data$col_2022_rate)
+
+#Using MLE
+
+llbeta=function(data, par, neg=F){
+  alpha=par[1]
+  beta=par[2]
+  
+  loglik=sum(log(dbeta(x=data, alpha, beta)), na.rm=T)
+  return(ifelse(neg, -loglik, loglik))
+}
+par=c(1,1) #initial guess 
+
+optim(par = par,
+      fn = llbeta,
+      data=data$col_2022_rate,
+      neg=T,
+      )
+
+
+alpha=8
+beta=950
+n=266
+
+momalpha=numeric()
+mombeta=numeric()
+mlealpha=numeric()
+mlebeta=numeric()
+
+for (i in 1:1000){
+  set.seed(7272+i)
+  beta.sample <- rbeta(n = n,  # sample size
+                     shape1 = alpha,   # alpha parameter
+                     shape2 = beta)    # beta parameter
+  par=c(1,1) #initial guess
+  momsol=nleqslv(x=par,
+          fn = MOM.beta,
+          data=beta.sample)
+  momalpha= c(momalpha, momsol$x[1])
+  mombeta= c(mombeta, momsol$x[2])
+  par=c(1,1) #initial guess 
+  mlesol=optim(par = par,
+        fn = llbeta,
+        data=beta.sample,
+        neg=T,
+  )
+  mlealpha=c(mlealpha, mlesol$par[1])
+  mlebeta=c(mlebeta, mlesol$par[2])
+}
+
+
+taskeighttibble= tibble(mlealpha=mlealpha, mlebeta=mlebeta, 
+                        momalpha=momalpha, mombeta=mombeta)
+
+
+alpha_mom_plot <- ggplot(taskeighttibble) + 
+  geom_density(aes(x = momalpha), fill = "blue", alpha = 0.5) + 
+  labs(title = "Density of Alpha (MOM)", x = "Alpha Estimate", y = "Density") + 
+  theme_minimal()
+
+alpha_mle_plot <- ggplot(taskeighttibble) + 
+  geom_density(aes(x = mlealpha), fill = "red", alpha = 0.5) + 
+  labs(title = "Density of Alpha (MLE)", x = "Alpha Estimate", y = "Density") + 
+  theme_minimal()
+
+beta_mom_plot <- ggplot(taskeighttibble) + 
+  geom_density(aes(x = mombeta), fill = "blue", alpha = 0.5) + 
+  labs(title = "Density of Beta (MOM)", x = "Beta Estimate", y = "Density") + 
+  theme_minimal()
+
+beta_mle_plot <- ggplot(taskeighttibble) + 
+  geom_density(aes(x = mlebeta), fill = "red", alpha = 0.5) + 
+  labs(title = "Density of Beta (MLE)", x = "Beta Estimate", y = "Density") + 
+  theme_minimal()
+
+# Combine the plots in a 2x2 grid
+alpha_mom_plot + alpha_mle_plot + beta_mom_plot + beta_mle_plot + 
+  plot_layout(ncol = 2, nrow = 2)
+@
+
+<<echo=FALSE, results='asis', message=FALSE, warning=FALSE>>=
+library(tidyverse)
+data=read_csv("deathcrudedata.csv")|>
+  mutate(col_2022_rate=`2022`/1000)
+
+alpha=8
+beta=950
+n=266
+
+momalpha=numeric()
+mombeta=numeric()
+mlealpha=numeric()
+mlebeta=numeric()
+
+for (i in 1:1000){
+  set.seed(7272+i)
+  beta.sample <- rbeta(n = n,  # sample size
+                     shape1 = alpha,   # alpha parameter
+                     shape2 = beta)    # beta parameter
+  par=c(1,1) #initial guess
+  momsol=nleqslv(x=par,
+          fn = MOM.beta,
+          data=beta.sample)
+  momalpha= c(momalpha, momsol$x[1])
+  mombeta= c(mombeta, momsol$x[2])
+  par=c(1,1) #initial guess 
+  mlesol=optim(par = par,
+        fn = llbeta,
+        data=beta.sample,
+        neg=T,
+  )
+  mlealpha=c(mlealpha, mlesol$par[1])
+  mlebeta=c(mlebeta, mlesol$par[2])
+}
+
+bias_mom_alpha <- mean(momalpha) - alpha
+bias_mle_alpha <- mean(mlealpha) - alpha
+var_mom_alpha <- var(momalpha)
+var_mle_alpha <- var(mlealpha)
+
+precision_mom_alpha <- 1 / var_mom_alpha
+precision_mle_alpha <- 1 / var_mle_alpha
+
+mse_mom_alpha <- var_mom_alpha + bias_mom_alpha^2
+mse_mle_alpha <- var_mle_alpha + bias_mle_alpha^2
+
+# Calculate Bias, Precision, and MSE for beta
+bias_mom_beta <- mean(mombeta) - beta
+bias_mle_beta <- mean(mlebeta) - beta
+var_mom_beta <- var(mombeta)
+var_mle_beta <- var(mlebeta)
+
+precision_mom_beta <- 1 / var_mom_beta
+precision_mle_beta <- 1 / var_mle_beta
+
+mse_mom_beta <- var_mom_beta + bias_mom_beta^2
+mse_mle_beta <- var_mle_beta + bias_mle_beta^2
+
+
+dt <- tibble(
+  Parameter = c("Alpha", "Beta", "Alpha", "Beta"),
+  Method = c("MOM", "MOM", "MLE", "MLE"),
+  Bias = c(bias_mom_alpha, bias_mom_beta, bias_mle_alpha, bias_mle_beta),
+  Precision = c(precision_mom_alpha, precision_mom_beta, precision_mle_alpha, precision_mle_beta),
+  MSE = c(mse_mom_alpha, mse_mom_beta, mse_mle_alpha, mse_mle_beta)
+)
+
+# Use the xtable package to create LaTeX table output
+library(xtable)
+print(xtable(dt, caption = "Bias, Precision, and MSE for Alpha and Beta Estimations"),
+      type = "latex", include.rownames = FALSE, comment = FALSE)
+@
 
 \end{document}

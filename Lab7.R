@@ -1,6 +1,6 @@
 #Task One
 library(tidyverse)
-library()
+
 #create a function that takes alpha and beta as inputs and computes the 
 #mean, variance, skewness, and excess kurtosis
 Beta = function(alpha, beta){
@@ -113,7 +113,7 @@ beta.moment=function(alpha, beta, k, centered){
 #Case 1
 alpha=2
 beta=5
-part_2_case_1=beta.moment(alpha, beta, k=2, centered=F)#change for each moment
+part_2_case_1=beta.moment(alpha, beta, k=4, centered=T)#change for each moment
 
 #Case 2
 alpha=5
@@ -387,6 +387,8 @@ new_grid_plot= p_mean + p_variance + p_skewness + p_kurtosis + plot_layout(ncol 
 print(new_grid_plot)
 
 #Task Five
+library(tidyverse)
+library(ggplot2)
 library(moments)
 n=500
 alpha=2
